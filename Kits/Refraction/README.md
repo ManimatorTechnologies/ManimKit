@@ -33,3 +33,5 @@ past the critical angle), is an empty group, so the order never changes.
   rays, the arcs and the labels follow it, so you can watch θ₂ and the reflection change with θ₁, or the light stop
   getting through past the critical angle. Play it again to sweep on from there. It works wherever the refraction was
   moved, turned or scaled to.
+
+Try it with light coming from below.
