@@ -1,0 +1,2 @@
+# Keep line endings LF in the repository, whatever line-ending settings a contributor's git has
+* text=auto eol=lf
