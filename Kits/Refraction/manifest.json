@@ -4,6 +4,7 @@
   "version": "2.0",
   "description": "Light crossing from one medium into another: it bends by Snell's law and is partly reflected, as the refractive indices of the two media say",
   "license": "MIT",
+  "author": "SavithOnline",
   "object": {
     "class": "Refraction",
     "style": "none",

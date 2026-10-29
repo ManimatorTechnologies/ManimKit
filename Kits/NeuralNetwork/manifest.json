@@ -4,6 +4,7 @@
   "version": "1.1",
   "description": "Layers of neurons joined by edges; big layers show an ellipsis and a brace with their size",
   "license": "MIT",
+  "author": "SavithOnline",
   "object": {
     "class": "NeuralNetwork",
     "style": "none",

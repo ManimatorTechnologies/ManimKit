@@ -4,8 +4,9 @@ Write your own **customizations** for [Manimator](https://manimator.app): a new 
 the animations made for it. When you upload one, its object shows up in the editor next to Manim's own objects,
 and its animations play on it.
 
-This repo has three working examples to start from, plus a script that checks your customization and packs it
-into a `.manimkit` file ready to upload.
+This repo is also Manimator's **gallery**: every folder in `Kits/` is a customization anyone can add to their
+projects. It has three to start from, plus a script that checks your customization and packs it into a `.manimkit`
+file ready to upload.
 
 ## Quick start
 
@@ -15,6 +16,7 @@ into a `.manimkit` file ready to upload.
 4. Run `python Build.py Kits/Pendulum` (Python 3.9+, nothing to install). It checks the files and writes
    `Builds/Pendulum.manimkit`.
 5. In Manimator, open **Customizations**, upload the file, and try it in a project.
+6. To share it in the gallery, open a pull request: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Running `python Build.py` on its own builds every folder in `Kits/`.
 
@@ -45,4 +47,5 @@ Both are written the way Manim's own classes are written.
 
 ## License
 
-MIT. See [LICENSE](LICENSE). Your own customizations can use any license; set it in `manifest.json`.
+MIT. See [LICENSE](LICENSE). The gallery's customizations are MIT too. One you only upload to your own
+Customizations can use any license; set it in `manifest.json`.

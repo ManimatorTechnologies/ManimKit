@@ -1,0 +1,27 @@
+# Checks every customization on each pull request and on main. Pull requests also get the gallery's rules
+# (.github/PullRequest.py). It only reads the files: no customization's code runs here.
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Build every customization
+        run: python3 Build.py
+      - name: Check the pull request
+        if: github.event_name == 'pull_request'
+        env:
+          OPENED_BY: ${{ github.event.pull_request.user.login }}
+          ROLE: ${{ github.event.pull_request.author_association }}
+        run: python3 .github/PullRequest.py

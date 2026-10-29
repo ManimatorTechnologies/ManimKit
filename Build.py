@@ -35,9 +35,10 @@ MAX_PARAMS = 20
 MAX_ANIMATIONS = 10
 CLASS_RE = re.compile(r"^[A-Z][A-Za-z0-9]{0,39}$")
 PARAM_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
+AUTHOR_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$")  # a GitHub user name
 RESERVED_PARAMS = {"mobject", "mobjects", "run_time", "rate_func", "lag_ratio", "name", "self", "args", "kwargs",
                    "target", "dim", "z_index", "introducer", "remover", "suspend_mobject_updating"}
-MANIFEST_FIELDS = {"manimkit", "name", "version", "description", "license", "object", "animations"}
+MANIFEST_FIELDS = {"manimkit", "name", "version", "description", "license", "author", "object", "animations"}
 OBJECT_FIELDS = {"class", "style", "params"}
 ANIMATION_FIELDS = {"class", "name", "description", "params", "introducer", "remover", "run_time"}
 PARAM_FIELDS = {"name", "kind", "default", "label", "tooltip", "min", "max", "step", "decimals", "slider", "choices"}
@@ -142,6 +143,9 @@ def check_manifest(text: str) -> list[str]:
     _text(raw.get("version"), "version", 20)
     _text(raw.get("description"), "description", 200)
     _text(raw.get("license"), "license", 60)
+    _text(raw.get("author"), "author", 39)
+    if raw.get("author") is not None and not AUTHOR_RE.match(raw["author"]):
+        raise KitError('author must be your GitHub user name, like "SavithOnline".')
     obj = raw.get("object")
     if not isinstance(obj, dict):
         raise KitError('give the "object": {"class": "Battery", "params": [...]}.')

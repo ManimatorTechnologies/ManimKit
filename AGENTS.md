@@ -13,6 +13,7 @@ Kits/<Name>/kit.js          the classes in JavaScript (Manimator draws this)
 Kits/<Name>/kit.py          the same classes in Python (Manim renders this)
 Kits/<Name>/README.md       optional, shown to users
 Build.py                    checks a kit and zips it into Builds/<Name>.manimkit
+.github/PullRequest.py      the gallery's extra rules, checked on every pull request
 ```
 
 Name folders in PascalCase, matching the object's class (`Kits/Pendulum` for `Pendulum`).
@@ -25,6 +26,8 @@ Name folders in PascalCase, matching the object's class (`Kits/Pendulum` for `Pe
 3. Run `python Build.py Kits/<Name>`. Fix every error it prints. Exit code 0 means it passed.
 4. The user uploads `Builds/<Name>.manimkit` on Manimator's Customizations page. Only Manimator can show how
    it looks; `Build.py` checks structure only, not drawing.
+5. To put it in the gallery, the user opens a pull request to this repository (CONTRIBUTING.md). Once merged, the
+   folder is the gallery's copy: each later change to it becomes a new version.
 
 `Build.py` runs Manimator's upload checks except one: Manimator also rejects class names that Manim or Manimator
 already use (`Circle`, `FadeIn`, `Arrow`...). Pick distinctive names.
@@ -38,6 +41,7 @@ already use (`Circle`, `FadeIn`, `Arrow`...). Pick distinctive names.
   "version": "1.1",
   "description": "A battery whose fill shows its charge",
   "license": "MIT",
+  "author": "SavithOnline",
   "object": {
     "class": "Battery",
     "style": "none",
@@ -55,6 +59,8 @@ already use (`Circle`, `FadeIn`, `Arrow`...). Pick distinctive names.
 ```
 
 - `manimkit` is always `2`. `name` is required (up to 40 chars), `description` up to 200.
+- `author` is the GitHub user name of whoever wrote it; the gallery credits them by it. `license` is `"MIT"` for
+  everything in this repository.
 - `object.class` and each `animations[].class`: PascalCase, unique, and defined in both `kit.py` and `kit.js`.
 - `object.style` controls which color controls the editor shows: `"none"` (the object keeps its own colors),
   `"shape"` (stroke and fill), `"line"` or `"text"`.
@@ -71,6 +77,17 @@ already use (`Circle`, `FadeIn`, `Arrow`...). Pick distinctive names.
 - **Angles are degrees in the manifest and the editor, but radians in your code.** A default of `40` arrives
   as `40 * DEGREES`.
 - A new version of an uploaded kit must keep `object.class`; everything else may change.
+
+## The gallery's rules
+
+Pull requests are checked by `.github/PullRequest.py` (and read by a maintainer before merging):
+
+- The folder is named after the object's class, and holds only `manifest.json`, `kit.js`, `kit.py`, `README.md`.
+- No class name (object or animation) is used by another folder.
+- `author` is set; for a new kit it is the GitHub user opening the pull request. `license` is `"MIT"`.
+- Changing an existing kit needs a new `version` and keeps `object.class`. Only its author or a maintainer can
+  change or remove it.
+- One kit per pull request.
 
 ## kit.js
 
