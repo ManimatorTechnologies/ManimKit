@@ -1,44 +1,41 @@
 # ManimKit
 
-Write your own **customizations** for [Manimator](https://manimator.app): a new object, written in code, with
-the animations made for it. When you upload one, its object shows up in the editor next to Manim's own objects,
-and its animations play on it.
+Write **customizations** for [Manimator](https://manimator.app): Python libraries written in Manim. Once a user adds
+one, its objects and animations appear in Manimator's visual editor, and its package can be imported in the Code
+view (`from manimchem import *`). Both run in the user's browser, in Python. The Python download puts the package next
+to `scene.py`, so the same scene renders in Manim on a computer.
 
-This repo is also Manimator's **gallery**: every folder in `Kits/` is a customization anyone can add to their
-projects. It has three to start from, plus a script that checks your customization and packs it into a `.manimkit`
-file ready to upload.
+This repo is also Manimator's **gallery**: every folder in `Libraries/` is a customization anyone can add. It has a
+script that checks a customization and packs it into a `.manimkit` file ready to upload.
 
 ## Quick start
 
 1. Fork or copy this repo.
-2. Copy an example folder in `Kits/` and rename it, for example `Kits/Pendulum`.
-3. Edit its four files (see below).
-4. Run `python Build.py Kits/Pendulum` (Python 3.9+, nothing to install). It checks the files and writes
-   `Builds/Pendulum.manimkit`.
-5. In Manimator, open **Customizations**, upload the file, and try it in a project.
+2. Make a folder in `Libraries/`, named after your package: `Libraries/Pendulums` for `pendulums`.
+3. Put your package in it (`Libraries/Pendulums/pendulums/__init__.py` and more), with a `manifest.json` and a
+   `README.md` (see below).
+4. Run `python Build.py Libraries/Pendulums` (Python 3.9+, nothing to install). It checks the files and writes
+   `Builds/Pendulums.manimkit`.
+5. In Manimator, open **Customizations**, upload the file, and try its objects in the editor and its package in the
+   Code view.
 6. To share it in the gallery, open a pull request: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Running `python Build.py` on its own builds every folder in `Kits/`.
+Running `python Build.py` on its own builds every folder in `Libraries/`.
 
 ## What's in a customization
 
 | File | What it is |
 |---|---|
-| `manifest.json` | The name, the object's and animations' class names, and the settings the editor shows |
-| `kit.js` | The classes in JavaScript. Manimator runs this to draw and play your object in the browser |
-| `kit.py` | The same classes in Python, for Manim. Used when someone downloads their project as Python |
-| `README.md` | Optional: how to use it, shown on the customization's page |
+| `manifest.json` | Its name, its package, and the objects and animations the editor offers, with their settings |
+| `<package>/` | The Python package, written in plain Manim, and the text data files it reads |
+| `README.md` | How to use it, shown on its page |
+| `LICENSE.md` | Its license, which goes into downloads with it |
 
-You write the object twice, once in JavaScript and once in Python, and both versions must draw the same thing.
-Both are written the way Manim's own classes are written.
+## In the gallery
 
-## The examples
-
-| Kit | Shows how to |
+| Customization | What it has |
 |---|---|
-| [Battery](Kits/Battery) | The smallest one: an object with one setting, and a "Pop in" animation |
-| [Refraction](Kits/Refraction) | Angle settings, LaTeX labels, and an animation that rebuilds the object with new settings |
-| [NeuralNetwork](Kits/NeuralNetwork) | A 3Blue1Brown-style network, with an animation that plays across its parts |
+| [ManimChem](Libraries/ManimChem) | `manimchem`: molecules in 2D and 3D (from PubChem or .mol files), Bohr atoms, orbitals, element cards, periodic tables and formulas. A fork of [manim-chemistry](https://github.com/UnMolDeQuimica/manim-Chemistry) |
 
 ## Learn more
 

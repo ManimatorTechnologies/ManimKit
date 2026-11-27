@@ -1,0 +1,18 @@
+from .element import *  # noqa F841
+from .periodic_table import *  # noqa F841
+from .threeD import *  # noqa F841
+from .twoD import *  # noqa F841
+from .orbitals import *  # noqa F841
+from .bohr_atom import *  # noqa F841
+from .utils import *  # noqa F841
+from .molecule import Molecule  # noqa F841
+from .manim_chemistry_molecule import *
+from .ManimatorObjects import *  # noqa F841
+
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version(__name__)
+except PackageNotFoundError:
+    # not installed with pip: copied next to a script, or in Manimator's browser Python
+    __version__ = "0.6.0"
