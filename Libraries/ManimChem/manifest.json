@@ -1,0 +1,63 @@
+{
+  "manimkit": 3,
+  "name": "manimchem",
+  "version": "0.7.0",
+  "description": "Chemistry for Manim: 2D and 3D molecules from PubChem or .mol files, Bohr atoms, orbitals, element cards and periodic tables",
+  "license": "MIT",
+  "author": "SavithOnline",
+  "library": {"package": "manimchem", "requires": []},
+  "objects": [
+    {"class": "Molecule2D", "name": "Molecule", "description": "A molecule drawn flat, from PubChem by name or from a .mol file's text",
+     "params": [
+       {"name": "pubchem", "kind": "str", "default": "caffeine", "label": "PubChem name", "tooltip": "Any name PubChem knows: water, aspirin, glucose..."},
+       {"name": "mol", "kind": "text", "default": "", "label": ".mol text", "tooltip": "Paste a .mol file to draw it instead of the PubChem name"},
+       {"name": "style", "kind": "enum", "choices": [["structural", "Structural formula"], ["graph", "Atoms and bonds"]], "default": "structural", "label": "Style"},
+       {"name": "hydrogens", "kind": "bool", "default": false, "label": "Hydrogens", "tooltip": "Show every hydrogen atom"},
+       {"name": "numbers", "kind": "bool", "default": false, "label": "Atom numbers"}
+     ]},
+    {"class": "Molecule3D", "name": "3D molecule", "description": "A ball-and-stick molecule from PubChem's 3D record; turn the camera of a 3D scene to see it in depth",
+     "params": [
+       {"name": "pubchem", "kind": "str", "default": "caffeine", "label": "PubChem name"},
+       {"name": "mol", "kind": "text", "default": "", "label": ".mol text", "tooltip": "Paste a .mol file with 3D coordinates to draw it instead"},
+       {"name": "hydrogens", "kind": "bool", "default": true, "label": "Hydrogens"}
+     ]},
+    {"class": "BohrAtom", "name": "Bohr atom", "description": "Electrons on their shells around a nucleus of protons and neutrons",
+     "params": [
+       {"name": "e", "kind": "int", "default": 6, "min": 1, "max": 118, "label": "Electrons"},
+       {"name": "p", "kind": "int", "default": 6, "min": 1, "max": 118, "label": "Protons"},
+       {"name": "n", "kind": "int", "default": 6, "min": 0, "max": 200, "label": "Neutrons"},
+       {"name": "seed", "kind": "int", "default": 1, "min": 0, "max": 9999, "label": "Nucleus layout", "tooltip": "Change it to arrange the protons and neutrons another way"},
+       {"name": "orbit_color", "kind": "color", "default": "#FFFFFF", "label": "Shells"},
+       {"name": "electron_color", "kind": "color", "default": "#58C4DD", "label": "Electrons color"},
+       {"name": "proton_color", "kind": "color", "default": "#FC6255", "label": "Protons color"},
+       {"name": "neutron_color", "kind": "color", "default": "#FFFFFF", "label": "Neutrons color"}
+     ]},
+    {"class": "Orbital", "name": "Orbital", "description": "An atomic orbital's shape: its positive lobes in one color, its negative ones in another",
+     "params": [
+       {"name": "l", "kind": "int", "default": 1, "min": 0, "max": 3, "label": "l (shape)", "tooltip": "0 s, 1 p, 2 d, 3 f"},
+       {"name": "m", "kind": "int", "default": 0, "min": -3, "max": 3, "label": "m", "tooltip": "From -l to l"},
+       {"name": "size", "kind": "float", "default": 3, "min": 0.5, "max": 8, "step": 0.1, "label": "Size"},
+       {"name": "positive_color", "kind": "color", "default": "#FC6255", "label": "Positive lobes"},
+       {"name": "negative_color", "kind": "color", "default": "#58C4DD", "label": "Negative lobes"}
+     ]},
+    {"class": "ElementCard", "name": "Element card", "description": "One element's card: its number, symbol, name and color",
+     "params": [
+       {"name": "atomic_number", "kind": "int", "default": 6, "min": 1, "max": 118, "label": "Atomic number"}
+     ]},
+    {"class": "PeriodicTable", "name": "Periodic table", "description": "All 118 elements, each in its color"},
+    {"class": "ChemicalFormula", "name": "Formula", "description": "A formula with its numbers written small, like H2SO4",
+     "params": [
+       {"name": "formula", "kind": "str", "default": "H2SO4", "label": "Formula"},
+       {"name": "metal_color", "kind": "color", "default": "#FFFFFF", "label": "Metals"},
+       {"name": "non_metal_color", "kind": "color", "default": "#FFFFFF", "label": "Non-metals"},
+       {"name": "oxygen_color", "kind": "color", "default": "#FFFFFF", "label": "Oxygen"}
+     ]}
+  ],
+  "animations": [
+    {"class": "Spin", "name": "Spin", "description": "Turns the object about its center",
+     "params": [{"name": "turns", "kind": "float", "default": 1, "min": 0.25, "max": 10, "step": 0.25, "label": "Turns"}]},
+    {"class": "OrbitElectrons", "name": "Orbit electrons", "description": "Moves the electrons around their shells, the outer ones slower",
+     "only": ["BohrAtom"], "run_time": 3,
+     "params": [{"name": "turns", "kind": "float", "default": 1, "min": 0.25, "max": 10, "step": 0.25, "label": "Turns"}]}
+  ]
+}
