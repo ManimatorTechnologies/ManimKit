@@ -58,8 +58,13 @@ class MAtomObject(VGroup):
         if representation_type:
             return representation_type
 
-        if self.element == "C":  # and not self.explicit_carbons:
-            representation_type = "skeleton"
+        if self.element == "C":
+            # A carbon stays a bare line vertex, except when asked for or when hydrogens are drawn (a full
+            # structural formula). MMoleculeObject also labels lone carbons (methane, CO2) itself.
+            if self.explicit_carbons or self.explicit_hydrogens:
+                representation_type = "complete"
+            else:
+                representation_type = "skeleton"
 
         elif self.element == "H":
             if self.explicit_hydrogens:

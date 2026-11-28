@@ -1,5 +1,7 @@
 from typing import Optional, Tuple, Dict
 
+import numpy as np
+
 from manim import (
     DOWN,
     GREEN,
@@ -68,9 +70,12 @@ class MMoleculeObject(VGroup, AbstractMolecule):
         add_atoms_numbering: bool = False,
         add_bonds_numbering: bool = False,
         rotate_bonds: list = [],
+        straighten: bool = False,
         **kwargs,
     ):
         VGroup.__init__(self, **kwargs)
+        if straighten:
+            atoms_dict = self.straightened(atoms_dict)
         self.atoms_dict = atoms_dict
         self.bonds_dict = bonds_dict
         self.representation_type = representation_type
@@ -88,16 +93,65 @@ class MMoleculeObject(VGroup, AbstractMolecule):
         self.complete_missing_hydrogens()
         self.move_to(ORIGIN)
 
+    @staticmethod
+    def straightened(atoms_dict: dict) -> dict:
+        """The atoms turned so that a molecule whose atoms all lie on one line (CO2, O2, HCN) lies level, as it is
+        usually drawn; PubChem's 2D records often draw such molecules at a slant. Other molecules are unchanged."""
+        points = [np.array(atom["coords"], dtype=float)[:2] for atom in atoms_dict.values()]
+        if len(points) < 2:
+            return atoms_dict
+        start = points[0]
+        far = max(points, key=lambda p: np.linalg.norm(p - start))
+        direction = far - start
+        length = np.linalg.norm(direction)
+        if length < 1e-9:
+            return atoms_dict
+        unit = direction / length
+        if any(abs(unit[0] * (p - start)[1] - unit[1] * (p - start)[0]) > 0.05 * length for p in points):
+            return atoms_dict
+        angle = np.arctan2(unit[1], unit[0])
+        if abs(np.sin(angle)) < 1e-6:
+            return atoms_dict
+        cos, sin = np.cos(-angle), np.sin(-angle)
+        turned = {}
+        for index, atom in atoms_dict.items():
+            x, y = np.array(atom["coords"], dtype=float)[:2] - start
+            coords = np.array(atom["coords"], dtype=float).copy()
+            coords[0], coords[1] = start[0] + cos * x - sin * y, start[1] + sin * x + cos * y
+            turned[index] = {**atom, "coords": coords}
+        return turned
+
+    def carbon_needs_symbol(self, atom: dict) -> bool:
+        """A carbon is written out where a bare line vertex would show nothing: with no other heavy atom (methane),
+        at a chain end on a non-carbon (N-CH3 in caffeine, methanol), or in the middle of a straight line (CO2, HCN)."""
+        if atom.get("element") != "C":
+            return False
+        heavy = [i for i, element in (atom.get("bond_to") or {}).items() if element != "H"]
+        if not heavy:
+            return True
+        elements = [atom["bond_to"][i] for i in heavy]
+        if len(heavy) == 1:
+            return elements[0] != "C"
+        if len(heavy) == 2 and all(i in self.atoms_dict for i in heavy):
+            here = np.array(atom["coords"], dtype=float)[:2]
+            a, b = (np.array(self.atoms_dict[i]["coords"], dtype=float)[:2] - here for i in heavy)
+            norms = np.linalg.norm(a) * np.linalg.norm(b)
+            return norms > 0 and np.dot(a, b) / norms < -0.98
+        return False
+
     def get_atoms(self):
         atoms = VDict()
         atoms_by_index = {}
         for index, atom in self.atoms_dict.items():
+            representation_type = self.representation_type
+            if representation_type is None and self.carbon_needs_symbol(atom):
+                representation_type = "complete"
             matom = MAtomObject(
                 coords=atom["coords"],
                 element=atom["element"],
                 explicit_carbons=self.explicit_carbons,
                 explicit_hydrogens=self.explicit_hydrogens,
-                representation_type=self.representation_type,
+                representation_type=representation_type,
                 planar=self.planar,
                 bond_to=atom.get("bond_to"),
                 index=index,
@@ -114,6 +168,9 @@ class MMoleculeObject(VGroup, AbstractMolecule):
                 # TODO: Add logic to check type of bond
                 from_atom = self.atoms_by_index.get(index)
                 to_atom = self.atoms_by_index.get(bond.get("to"))
+                if from_atom is None or to_atom is None:
+                    continue
+                bond_type = int(bond.get("type") or 1)
                 if from_atom.element == "H" or to_atom.element == "H":
                     stereo = bond.get("stereo")
 
@@ -160,7 +217,14 @@ class MMoleculeObject(VGroup, AbstractMolecule):
                             continue
                     # you don't need not x and not y
                     # just use De Morgan's law ! (syntactic detail, doesn't change code)
-                    elif (from_atom.explicit_hydrogens) or (to_atom.explicit_hydrogens):
+                    # A hydrogen that is drawn (all of them when explicit, and those on O, N... always) gets its bond;
+                    # before, the hydrogens of water floated next to the O with no bonds.
+                    elif (
+                        from_atom.explicit_hydrogens
+                        or to_atom.explicit_hydrogens
+                        or (from_atom if from_atom.element == "H" else to_atom).representation
+                        != "skeleton"
+                    ):
                         # make bonds to explicit hydrogens
                         # TODO: clean repetitive code
                         self.atoms[from_atom.index] = (
@@ -183,7 +247,6 @@ class MMoleculeObject(VGroup, AbstractMolecule):
                         continue
 
                 else:
-                    bond_type = int(bond.get("type"))
                     if bond_type == 2 or bond_type == 5 or bond_type == 7:
                         new_bond = DoubleBond(  # TODO: Add function inside bond to create it from data
                             from_atom=from_atom,
@@ -284,7 +347,11 @@ class MMoleculeObject(VGroup, AbstractMolecule):
     def complete_missing_hydrogens(self):
         supported_atoms = ["O", "S", "N", "P"]
 
-        for atom in self.atoms:
+        # a copy of the list: renaming an atom moves it in self.atoms, which skipped the atom after it
+        for atom in list(self.atoms):
+            if atom.element == "C" and atom.representation == "complete":
+                self.label_carbon_hydrogens(atom)
+                continue
             if atom.element not in supported_atoms:
                 continue
 
@@ -321,6 +388,24 @@ class MMoleculeObject(VGroup, AbstractMolecule):
                             self.atoms[atom.index] = atom.rename_atom(
                                 atom.element + "H", bonds_direction
                             )
+
+    def label_carbon_hydrogens(self, atom):
+        """Writes the hydrogens that are left out of the drawing next to a carbon that shows its symbol: CH4, H3C."""
+        # PubChem numbers left-out hydrogens apart from the drawn atoms, so their numbers can clash: count instead.
+        hydrogens = sum(1 for element in (atom.bond_to or {}).values() if element == "H")
+        bonds_direction = 0
+        for bond in self.bonds:
+            # by index: get_bonds swaps atoms for copies, so a bond may hold an older copy of this atom
+            if atom.index in (bond.from_atom.index, bond.to_atom.index):
+                other = bond.to_atom if bond.from_atom.index == atom.index else bond.from_atom
+                if other.element == "H":
+                    hydrogens -= 1
+                bonds_direction += other.coords[0] - atom.coords[0]
+        if hydrogens <= 0:
+            return
+        count = f"<sub>{hydrogens}</sub>" if hydrogens > 1 else ""
+        label = f"H{count}C" if bonds_direction > 0 else f"CH{count}"
+        self.atoms[atom.index] = atom.rename_atom(label, -bonds_direction)
 
     def from_mol_file(filename, *args, **kwargs):
         atoms, bonds = mol_parser(filename)
