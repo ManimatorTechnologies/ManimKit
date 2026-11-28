@@ -41,6 +41,7 @@ class Molecule2D(VGroup):
                                       numeric_label=bool(numbers))
         else:
             self.molecule = _molecule(MMoleculeObject, pubchem, mol, ignore_hydrogens=not hydrogens,
+                                      explicit_hydrogens=bool(hydrogens), straighten=True,
                                       add_atoms_numbering=bool(numbers))
         self.add(self.molecule)
 
