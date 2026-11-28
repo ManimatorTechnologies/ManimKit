@@ -1,8 +1,8 @@
 # manimchem
 
 Chemistry for Manim: molecules in 2D and 3D, atomic orbitals, Bohr diagrams, element cards, periodic tables and
-chemical formulas. In [Manimator](https://manimator.app) its objects are in the editor and its package imports in the
-Code view, both running in your browser; it runs in Manim Community on your computer too.
+chemical formulas. In [Manimator](https://manimator.app) its objects and animations are in the editor, running in your
+browser. It runs in Manim Community on your computer too, for example from Manimator's Python download.
 
 ```python
 from manim import *
@@ -35,15 +35,15 @@ manimchem is a fork of [manim-chemistry](https://github.com/UnMolDeQuimica/manim
 
 ## In Manimator
 
-Add **manimchem** to your library from the gallery on the Customizations page. Then:
+It is in everyone's Manimator, with nothing to add:
 
-- **In the editor**, its Custom group has Molecule (from PubChem by name, or pasted .mol text; drawn as a structural
-  formula or as atoms and bonds), 3D molecule, Bohr atom, Orbital, Element card, Periodic table and Formula, and
-  the animations Spin and Orbit electrons (for Bohr atoms).
-- **In the Code view**, import it: `from manimchem import *`. Upload the `.mol` or `.sdf` files you draw from as data
-  files. `molecule_from_pubchem` reads molecules from PubChem directly, from your own computer.
-
-The Python download puts the `manimchem` folder next to `scene.py`; render it with Manim.
+- **In the editor**, the palette's Chemistry group has Molecule (from PubChem by name, or pasted .mol text; drawn as a
+  structural formula or as atoms and bonds), 3D molecule, Bohr atom, Orbital, Element card, Periodic table and
+  Formula, and the animation list has Spin and Orbit electrons (for Bohr atoms).
+- **To program**, download the project (**Download**, or File → Download, Ctrl+S): a ZIP of Python. It
+  has the `manimchem` folder next to `Scenes.py`, which imports it (`from manimchem import BohrAtom`), so the scenes
+  render with Manim Community: `manim -pqh Scenes.py MyScene`. There `molecule_from_file` reads your own .mol and
+  .sdf files, and `molecule_from_pubchem` reads PubChem.
 
 ## Classes
 

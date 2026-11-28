@@ -1,14 +1,14 @@
-"""Checks a pull request against the gallery's rules. GitHub Actions runs it (.github/workflows/Check.yml):
+"""Checks a pull request against the repository's rules. GitHub Actions runs it (.github/workflows/Check.yml):
 
     OPENED_BY=<GitHub user> ROLE=<author association> python .github/PullRequest.py
 
 BASE is what the pull request is compared with (default HEAD^1: GitHub checks out the pull request merged into its
-branch). Every customization (Libraries/<Name>/) must pass Build.py's checks, and these:
+branch). Every library (Libraries/<Name>/) must pass Build.py's checks, and these:
 
 - its folder is named after its package (ManimChem for manimchem), and no other one imports by that name;
 - no class name (object or animation) is used by another one;
 - its manifest names its author (a GitHub user name) and the MIT license;
-- a new customization's author is whoever opens the pull request;
+- a new library's author is whoever opens the pull request;
 - a change to one comes from its author, gives it a new "version" and keeps its package name.
 
 Maintainers (the repository's owners, members and collaborators) may add or change anyone's.
@@ -36,7 +36,7 @@ def git(*args: str) -> str:
 
 
 def manifest_at(commit: str, name: str) -> dict | None:
-    """A customization's manifest at a commit (None if it wasn't there)."""
+    """A library's manifest at a commit (None if it wasn't there)."""
     try:
         return json.loads(git("show", f"{commit}:Libraries/{name}/manifest.json"))
     except (subprocess.CalledProcessError, ValueError):
@@ -61,14 +61,14 @@ def class_names(m: dict | None) -> list[str]:
     return [c.get("class") for key in ("objects", "animations") for c in (m or {}).get(key) or []]
 
 
-def check_every_customization() -> list[str]:
+def check_every_library() -> list[str]:
     problems: list[str] = []
     packages: dict[str, str] = {}
     classes: dict[str, str] = {}
     for folder in sorted(p for p in Build.LIBRARIES.iterdir() if p.is_dir()):
         where = f"Libraries/{folder.name}"
         try:
-            Build.build(folder)
+            Build.check(folder)
         except (Build.KitError, OSError, UnicodeDecodeError) as e:
             problems.append(f"{where}: {e}")
             continue
@@ -77,7 +77,7 @@ def check_every_customization() -> list[str]:
         if folder.name.lower() != package.lower():
             problems.append(f"{where}: name the folder after its package ({package}), in PascalCase if you like.")
         if m.get("license") != "MIT":
-            problems.append(f'{where}: the gallery\'s customizations are MIT licensed, like this repository: set '
+            problems.append(f'{where}: Manimator\'s libraries are MIT licensed, like this repository: set '
                             f'"license": "MIT".')
         if not m.get("author"):
             problems.append(f'{where}: set "author" to your GitHub user name.')
@@ -101,9 +101,9 @@ def check_changes(base: str, opened_by: str, maintainer: bool) -> tuple[list[str
     for name in touched:
         where = f"Libraries/{name}"
         before, now = manifest_at(base, name), manifest_now(name)
-        if before is None:  # a new customization
+        if before is None:  # a new library
             if now is not None and now.get("author") != opened_by and not maintainer:
-                problems.append(f'{where}: a new customization\'s author is whoever adds it: set "author" to '
+                problems.append(f'{where}: a new library\'s author is whoever adds it: set "author" to '
                                 f'"{opened_by}".')
             continue
         author = before.get("author")
@@ -115,11 +115,11 @@ def check_changes(base: str, opened_by: str, maintainer: bool) -> tuple[list[str
         if now.get("author") != author and not maintainer:
             problems.append(f"{where}: its author stays {author}.")
         if (now.get("version") or "1.0") == (before.get("version") or "1.0"):
-            problems.append(f'{where}: give it a new "version" (it is "{before.get("version") or "1.0"}"): the gallery '
+            problems.append(f'{where}: give it a new "version" (it is "{before.get("version") or "1.0"}"): the site '
                             "keeps each version for the projects that use it.")
         if package_name(before) and package_name(now) != package_name(before):
             problems.append(f"{where}: keep its package name {package_name(before)} (a new folder starts a new "
-                            "customization).")
+                            "library).")
     return problems, outside
 
 
@@ -127,7 +127,7 @@ def main() -> int:
     base = os.environ.get("BASE") or "HEAD^1"
     opened_by = os.environ.get("OPENED_BY", "")
     maintainer = os.environ.get("ROLE", "") in MAINTAINERS
-    problems = check_every_customization()
+    problems = check_every_library()
     changes, outside = check_changes(base, opened_by, maintainer)
     problems += changes
     for problem in problems:
