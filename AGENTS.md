@@ -13,6 +13,7 @@ and real Manim runs it. Write it once, in Python.
 ```
 Libraries/<Name>/manifest.json   names, the package, the objects and animations the editor offers, their settings
 Libraries/<Name>/<package>/      the package: __init__.py, more .py files, text data files
+Libraries/<Name>/Icons/<Class>.svg  optional: an object's picture in the palette (up to 32 KB, 96x96 viewBox)
 Libraries/<Name>/README.md       shown to users
 Libraries/<Name>/LICENSE.md      its license (goes into downloads with it)
 Build.py                         checks a library as Manimator does

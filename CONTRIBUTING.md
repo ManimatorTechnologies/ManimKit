@@ -42,8 +42,8 @@ issue.
 
 ## What gets merged
 
-- One library per pull request, with only its own files: `manifest.json`, `README.md`, its license and its package
-  folder.
+- One library per pull request, with only its own files: `manifest.json`, `README.md`, its license, its package
+  folder and its `Icons/`.
 - Your own work, or code under a license that allows MIT (Manim's own code does; 3Blue1Brown's videos repository
   doesn't, as it is CC BY-NC-SA). Keep the original copyright notice of code you fork.
 - At least one object or animation in `manifest.json`: people use a library through the editor.

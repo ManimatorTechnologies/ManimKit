@@ -25,6 +25,8 @@ MAX_FILE = 2 * 1024 * 1024
 MAX_FILES = 400
 TOP_FILES = {"manifest.json": 64 * 1024, "README.md": 64 * 1024, "LICENSE": 64 * 1024, "LICENSE.md": 64 * 1024,
              "LICENSE.txt": 64 * 1024}
+ICONS = "Icons"  # Icons/<Class>.svg: an object's picture in the editor's palette
+MAX_ICON = 32 * 1024
 PACKAGE_SUFFIXES = (".py", ".csv", ".tsv", ".json", ".txt", ".md", ".mol", ".sdf", ".xml", ".dat")
 MANIFEST_FIELDS = {"manimkit", "name", "category", "version", "description", "license", "author", "library", "objects",
                    "animations"}
@@ -172,12 +174,19 @@ def check(folder: Path) -> None:
             raise KitError(f"unexpected file {rel}: use plain file and folder names.")
         if len(parts) == 1 and rel not in TOP_FILES:
             raise KitError(f"unexpected file {rel}: next to manifest.json a library holds only {package}/, "
-                           "README.md and its license.")
-        if len(parts) > 1 and (parts[0] != package or not rel.lower().endswith(PACKAGE_SUFFIXES)):
+                           f"{ICONS}/, README.md and its license.")
+        if parts[0] == ICONS:
+            objects = {o.get("class") for o in json.loads(manifest.read_text(encoding="utf-8-sig"))["objects"]}
+            if len(parts) != 2 or not rel.endswith(".svg") or parts[1][:-4] not in objects:
+                raise KitError(f"unexpected file {rel}: {ICONS}/ holds an object's picture as <Class>.svg, named after "
+                               "a class in manifest.json's \"objects\".")
+        elif len(parts) > 1 and (parts[0] != package or not rel.lower().endswith(PACKAGE_SUFFIXES)):
             raise KitError(f"unexpected file {rel}: a library holds Python and text data files in {package}/.")
         text = path.read_text(encoding="utf-8-sig")
         size = len(text.encode("utf-8"))
-        limit = TOP_FILES.get(rel, MAX_FILE)
+        if parts[0] == ICONS and "<svg" not in text[:2000]:
+            raise KitError(f"{rel} must be an SVG picture.")
+        limit = TOP_FILES.get(rel, MAX_ICON if parts[0] == ICONS else MAX_FILE)
         total += size
         files += 1
         if size > limit or total > MAX_UNPACKED:

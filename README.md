@@ -25,6 +25,7 @@ Running `python Build.py` on its own checks every folder in `Libraries/`.
 |---|---|
 | `manifest.json` | Its name, its palette group (`category`), its package, and the objects and animations the editor offers (at least one), with their settings |
 | `<package>/` | The Python package, written in plain Manim, and the text data files it reads |
+| `Icons/` | Optional: `<Class>.svg` for each object, its picture in the editor's palette (its symbol if none) |
 | `README.md` | How to use it |
 | `LICENSE.md` | Its license, which goes into downloads with it |
 
