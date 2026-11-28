@@ -1,19 +1,23 @@
 # AGENTS.md
 
-This repo is for writing Manimator customizations. Each customization is a Python library written in plain Manim
-Community. Manimator runs it in the user's browser (Pyodide, on Manimator's own `manim` module, which draws with its
-engine): the visual editor offers the classes its manifest lists, and Code view scripts import the package by its
-name. The Python download puts the package next to `scene.py`, where real Manim runs it. Write it once, in Python.
+This repo is for writing Manimator libraries. Each library is a Python package written in plain Manim Community, and
+every library here is in everyone's Manimator. Manimator runs it in the user's browser (Pyodide, on Manimator's own
+`manim` module, which draws with its engine): the visual editor offers the classes its manifest lists, objects in a
+palette group of their own (its `category`) and animations in a group of the animation list. That is the only way
+Manimator uses a library. People who want to program download the
+project as Python: the package goes next to `Scenes.py`, which imports it by name (`from manimchem import BohrAtom`),
+and real Manim runs it. Write it once, in Python.
 
 ## Layout
 
 ```
 Libraries/<Name>/manifest.json   names, the package, the objects and animations the editor offers, their settings
 Libraries/<Name>/<package>/      the package: __init__.py, more .py files, text data files
+Libraries/<Name>/Icons/<Class>.svg  optional: an object's picture in the palette (up to 32 KB, 96x96 viewBox)
 Libraries/<Name>/README.md       shown to users
 Libraries/<Name>/LICENSE.md      its license (goes into downloads with it)
-Build.py                         checks a customization and zips it into Builds/<Name>.manimkit
-.github/PullRequest.py           the gallery's extra rules, checked on every pull request
+Build.py                         checks a library as Manimator does
+.github/PullRequest.py           the repository's extra rules, checked on every pull request
 ```
 
 Name folders in PascalCase after the package (`Libraries/ManimChem` for `manimchem`).
@@ -21,12 +25,14 @@ Name folders in PascalCase after the package (`Libraries/ManimChem` for `manimch
 ## Workflow
 
 1. Start from `Libraries/ManimChem` (many objects, animations written in Python, data files, PubChem).
-2. Write the package and try it in Manim on a computer: `manim -pql scene.py` with a small scene that imports it.
+2. Write the package and try it in Manim on a computer: put a small `Scenes.py` that imports it next to the package
+   folder, as the Python download does, and run `manim -pql Scenes.py MyScene`.
 3. List in `manifest.json` the classes the editor should offer, with their settings.
 4. Run `python Build.py Libraries/<Name>`. Fix every error it prints. Exit code 0 means it passed.
-5. The user uploads `Builds/<Name>.manimkit` on Manimator's Customizations page. Only Manimator shows how it draws.
-6. To put it in the gallery, the user opens a pull request to this repository (CONTRIBUTING.md). Once merged, the
-   folder is the gallery's copy: each later change to it becomes a new version.
+5. The user tries it in Manimator run on their computer, pointed at their fork's branch (CONTRIBUTING.md). Only
+   Manimator shows how it draws.
+6. The user opens a pull request to this repository (CONTRIBUTING.md). Once merged, it is in everyone's Manimator:
+   each later change to the folder becomes a new version.
 
 ## manifest.json
 
@@ -50,11 +56,14 @@ Name folders in PascalCase after the package (`Libraries/ManimChem` for `manimch
 }
 ```
 
-- `manimkit` is always `3`. `name` is required (up to 40 chars), `description` up to 25 words.
+- `manimkit` is always `3`. `name` is required (up to 40 chars), `description` up to 25 words. `category`: its
+  group in the palette and the animation list, up to 24 chars (`"Chemistry"`); the name if left out.
 - `author` is the GitHub user name of whoever wrote it. `license` is `"MIT"` for everything in this repository.
-- `library.package`: the import name. Not a name Python, Manim or Manimator uses (`os`, `numpy`, `manim`...).
-  `library.requires`: only Pyodide's packages: biopython, mpmath, networkx, pandas, pillow, pyyaml, regex, scipy,
-  shapely, sympy.
+- `library.package`: the import name. Not a name Python, Manim or Manimator uses (`os`, `numpy`, `manim`...), nor,
+  ignoring case, a name the Python download gives its own files and folders: `scenes`, `assets`, `fonts`,
+  `codeview`, `readme`, `requirements`. `library.requires`: only Pyodide's packages: biopython, mpmath, networkx,
+  pandas, pillow, pyyaml, regex, scipy, shapely, sympy.
+- List at least one class in `objects` or `animations`: Manimator uses a library only through them.
 - `objects` (up to 20): `class` (PascalCase, defined in the package, not one of Manim's names), `name` and
   `description` for the editor, `style` (`"none"`: its own colors; `"shape"`, `"line"` or `"text"`: the editor's color
   controls), `params`.
@@ -80,21 +89,22 @@ Name folders in PascalCase after the package (`Libraries/ManimChem` for `manimch
   structures: Manimator's engine keeps its own. Use Manim's public options.
 - Editor classes take plain settings (numbers, text, colors...). Give each a constructor whose keyword arguments are
   the manifest's params (for example `Molecule2D(pubchem="caffeine", style="graph")`).
-- Data files: next to the modules, read with `Path(__file__).parent`. A user's uploaded files are next to the script
-  (plain `open()`). The only website a package may read is PubChem's REST API, with a synchronous request:
-  `js.XMLHttpRequest` in the browser (`sys.platform == "emscripten"`), `urllib` elsewhere.
+- Data files: next to the modules, read with `Path(__file__).parent`. Users can't upload data files to Manimator:
+  take a user's data as a setting (a `text` param, like manimchem's `.mol` text). The only website a package may
+  read is PubChem's REST API, with a synchronous request: `js.XMLHttpRequest` in the browser
+  (`sys.platform == "emscripten"`), `urllib` elsewhere.
 - Keep randomness seeded (a `seed` setting): the editor builds objects again and again, and should get the same one.
 - Only Python and text data files (.py .csv .tsv .json .txt .md .mol .sdf .xml .dat), plain names, up to 2 MB each,
-  4 MB zipped in all. Every .py must parse; Manimator never runs it on its server.
+  12 MB in all. Every .py must parse; Manimator never runs it on its server.
 
-## The gallery's rules
+## The repository's rules
 
 Pull requests are checked by `.github/PullRequest.py` (and read by a maintainer before merging): the folder is
 named after its package; no package or class name is used by another folder; `author` is set (for a new one, the
 GitHub user opening the pull request) and `license` is `"MIT"`; a change needs its author or a maintainer, a new
-`version`, and the same package name; one customization per pull request.
+`version`, and the same package name; one library per pull request.
 
 ## Reference
 
-- Full guide: <https://manimator.app/docs/customizations>
-- `Libraries/ManimChem` is a working, uploaded example. When unsure how to do something, copy what it does.
+- Full guide: <https://manimator.app/docs/libraries>
+- `Libraries/ManimChem` is a working, live example. When unsure how to do something, copy what it does.

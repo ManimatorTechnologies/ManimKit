@@ -1,7 +1,8 @@
 {
   "manimkit": 3,
   "name": "manimchem",
-  "version": "0.7.0",
+  "category": "Chemistry",
+  "version": "0.7.1",
   "description": "Chemistry for Manim: 2D and 3D molecules from PubChem or .mol files, Bohr atoms, orbitals, element cards and periodic tables",
   "license": "MIT",
   "author": "SavithOnline",
